@@ -23,7 +23,6 @@ async function publishMessage(id, text) {
     });
 
     // Print result, which includes information about the message (like TS)
-    // TODO remove this when done debugging
     console.log(result);
   }
   catch (error) {
@@ -36,12 +35,12 @@ function setupSchedule(events) {
   
   for (const dateString in events) {
     let dateAsMoment = moment.tz(dateString, timezone)
-    let date = dateAsMoment.toDate()
-    let message = `*${events[dateString].name}* is starting at ` + 
+    let fiveMinutesBefore = dateAsMoment.clone().subtract(5, 'minutes')
+    let scheduleDate = fiveMinutesBefore.toDate()
+    let message = `*${events[dateString].name}* is starting at ` +
         `${dateAsMoment.format('h:mma z')}. ` + 
         `Go to <${events[dateString].url}> to join in!`
-    let j = schedule.scheduleJob(date, function(){
-      console.log('Posting to live Slack!'); // TODO remove when done debugging
+    let j = schedule.scheduleJob(scheduleDate, function(){
       publishMessage(conversationId, message)
     });
   }
@@ -55,7 +54,5 @@ function setupSchedule(events) {
   
   console.log(eventSchedule)
   setupSchedule(eventSchedule)
-  
-  // publishMessage(conversationId, "Hello world :tada:");
   
 })();
