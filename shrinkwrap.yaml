@@ -1,5 +1,6 @@
 dependencies:
   '@slack/bolt': 1.6.0
+  moment: 2.27.0
 packages:
   /@slack/bolt/1.6.0:
     dependencies:
@@ -422,6 +423,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
+  /moment/2.27.0:
+    dev: false
+    resolution:
+      integrity: sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
   /ms/2.0.0:
     dev: false
     resolution:
@@ -621,3 +626,4 @@ shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   '@slack/bolt': ^1.6.0
+  moment: ^2.27.0
