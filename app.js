@@ -36,17 +36,20 @@ async function publishMessage(id, text, timestamp) {
 }
 
 async function setupSchedule(events) {
+  const now = moment()
   for (const event of events) {
-    let message = `*${event.name}* is starting at ` + // * for bold
-      `${event.start.format('h:mma z')}. ` +
-      `Go to ${event.url} to join in.` // no markdown needed for URL
-    if ('info' in event) {
-      message = message + `\n${event.info}`
-    }
-
     let fiveMinutesBefore = event.start.clone().subtract(5, 'minutes')
-    let timestamp = fiveMinutesBefore.unix()
-    await publishMessage(conversationId, message, timestamp)
+    if (fiveMinutesBefore.isAfter(now)) {
+      let message = `*${event.name}* is starting at ` + // * for bold
+        `${event.start.format('h:mma z')}. ` +
+        `Go to ${event.url} to join in.` // no markdown needed for URL
+      if ('info' in event) {
+        message = message + `\n${event.info}`
+      }
+
+      let timestamp = fiveMinutesBefore.unix()
+      await publishMessage(conversationId, message, timestamp)
+    }
   }
 }
 
@@ -97,8 +100,9 @@ function formatEvents(events) {
   return message
 }
 
-// noinspection JSUnusedLocalSymbols
 app.event('app_mention', ({ say }) => {
+  console.log('Replying to message from user')
+
   const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
   let reply = '';
 
@@ -121,6 +125,7 @@ app.event('app_mention', ({ say }) => {
   } else {
     reply = reply + 'There are no more events today.'
   }
+
   say(reply);
 });
 
