@@ -14,7 +14,7 @@
  * https://api.slack.com/messaging/scheduling
 */
 
-const moment = require('moment');
+const moment = require('moment-timezone');
 const timezone = 'America/New_York'
 
 const eventSchedule = [

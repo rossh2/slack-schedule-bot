@@ -1,6 +1,6 @@
 // Require the Bolt package (github.com/slackapi/bolt)
 const {App} = require("@slack/bolt");
-const moment = require('moment');
+const moment = require('moment-timezone');
 const eventSchedule = require('./eventSchedule.js')
 
 const app = new App({
