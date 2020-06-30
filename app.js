@@ -37,10 +37,13 @@ function setupSchedule(events) {
     let dateAsMoment = moment.tz(dateString, timezone)
     let fiveMinutesBefore = dateAsMoment.clone().subtract(5, 'minutes')
     let scheduleDate = fiveMinutesBefore.toDate()
-    let message = `*${events[dateString].name}* is starting at ` +
+    let message = `*${events[dateString].name}* is starting at ` + // * for bold
         `${dateAsMoment.format('h:mma z')}. ` + 
-        `Go to <${events[dateString].url}> to join in!`
-    let j = schedule.scheduleJob(scheduleDate, function(){
+        `Go to ${events[dateString].url} to join in.` // no markdown needed for URL
+    if ('info' in events[dateString]) {
+      message = message + ` ${events[dateString].info}`
+    }
+    schedule.scheduleJob(scheduleDate, function(){
       publishMessage(conversationId, message)
     });
   }
