@@ -98,7 +98,7 @@ function formatEvents(events) {
 }
 
 // noinspection JSUnusedLocalSymbols
-app.message(':wave:', async ({message, say}) => {
+app.message(async ({message, say}) => {
   const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
   let reply = '';
 
