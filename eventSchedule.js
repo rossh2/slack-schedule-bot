@@ -1,5 +1,7 @@
 /**
  * All times should be in EST.
+ * The URL doesn't actually need to be a URL,
+ * it can be any string (such as a list of URLs).
  *
  * Note that while it's possible to delete scheduled messages,
  * this isn't implemented in this app.
@@ -11,29 +13,31 @@
  * `scheduled_message_id` and then follow instructions at
  * https://api.slack.com/messaging/scheduling
 */
-const eventSchedule = {
-  '2020-06-26T15:15': {
-    'name': 'Coffee break',
-    'url': 'https://brandeis.sodexomyway.com/dining-near-me/dunkin-donuts'
+
+const moment = require('moment');
+const timezone = 'America/New_York'
+
+const eventSchedule = [
+  {
+    start: moment.tz('2020-06-30T11:30', timezone),
+    end: moment.tz('2020-06-30T12:00', timezone),
+    name: 'Themed coffee break: Ethics',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
+    info: 'Browse papers at http://www.ethicsinnlp.org/workshop/ for ideas.',
   },
-  '2020-06-26T15:45': {
-    'name': 'Coffee break (part 2)',
-    'url': 'https://brandeis.sodexomyway.com/dining-near-me/dunkin-donuts'
+  {
+    start: moment.tz('2020-06-30T14:00', timezone),
+    end: moment.tz('2020-06-30T15:00', timezone),
+    name: 'Coffee break',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
   },
-  '2020-06-30T11:30': {
-    'name': 'Themed coffee break: Ethics',
-    'url': 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
-    'info': 'Browse papers at http://www.ethicsinnlp.org/workshop/ for ideas.'
+  {
+    start: moment.tz('2020-06-30T16:00', timezone),
+    end: moment.tz('2020-06-30T16:30', timezone),
+    name: 'Themed coffee break: Pets',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
+    info: 'Show off your pet in your video! Or tell us about your pet in Slack.',
   },
-  '2020-06-30T14:00': {
-    'name': 'Coffee break',
-    'url': 'https://spatial.chat/s/WeSSLLI-ESSLLI/'
-  },
-  '2020-06-30T16:00': {
-    'name': 'Themed coffee break: Pets',
-    'url': 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
-    'info': 'Show off your pet in your video! Or tell us about your pet in Slack.'
-  },
-}
+]
 
 module.exports = eventSchedule

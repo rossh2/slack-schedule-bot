@@ -1,5 +1,5 @@
 // Require the Bolt package (github.com/slackapi/bolt)
-const { App } = require("@slack/bolt");
+const {App} = require("@slack/bolt");
 const moment = require('moment');
 const eventSchedule = require('./eventSchedule.js')
 
@@ -8,7 +8,7 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-let conversationId = 'G0164SF7RFD'; // #bot-testing
+const conversationId = 'G0164SF7RFD'; // #bot-testing
 
 async function publishMessage(id, text, timestamp) {
   try {
@@ -24,43 +24,112 @@ async function publishMessage(id, text, timestamp) {
     if (timestamp) {
       options.post_at = timestamp
       result = await app.client.chat.scheduleMessage(options)
-    }
-    else {
+    } else {
       result = await app.client.chat.postMessage(options);
     }
 
     // Print result, which includes information about the message (like TS)
     console.log(result);
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
   }
 }
 
-function setupSchedule(events) {
-  const timezone = 'America/New_York'
-  
-  for (const dateString in events) {
-    let dateAsMoment = moment.tz(dateString, timezone)
-    let fiveMinutesBefore = dateAsMoment.clone().subtract(5, 'minutes')
-    let timestamp = fiveMinutesBefore.unix()
-    let message = `*${events[dateString].name}* is starting at ` + // * for bold
-        `${dateAsMoment.format('h:mma z')}. ` + 
-        `Go to ${events[dateString].url} to join in.` // no markdown needed for URL
-    if ('info' in events[dateString]) {
-      message = message + `\n${events[dateString].info}`
+async function setupSchedule(events) {
+  for (const event of events) {
+    let message = `*${event.name}* is starting at ` + // * for bold
+      `${event.start.format('h:mma z')}. ` +
+      `Go to ${event.url} to join in.` // no markdown needed for URL
+    if ('info' in event) {
+      message = message + `\n${event.info}`
     }
-    publishMessage(conversationId, message, timestamp)
+
+    let fiveMinutesBefore = event.start.clone().subtract(5, 'minutes')
+    let timestamp = fiveMinutesBefore.unix()
+    await publishMessage(conversationId, message, timestamp)
   }
 }
+
+function getCurrentAndNextEvents(events) {
+  let currentEvents = []
+  let nextEvents = [];
+  const now = moment()
+  for (const event of events) {
+    // Assemble current event(s)
+    if (event.start.isSameOrBefore(now, 'minute') && event.end.isSameOrAfter(now, 'minute')) {
+      currentEvents.push(event)
+    }
+    // Assemble next event(s)
+    if (event.start.isSame(now, 'day') && event.start.isAfter(now, 'minute')) {
+      if (!nextEvents) {
+        nextEvents = [event]
+      } else {
+        const nextStart = nextEvents[0].start
+        if (nextStart.isSame(event.start, 'minute')) {
+          // Add concurrent event
+          nextEvents.push(event)
+        } else if (nextStart.isAfter(event.start, 'minute')) {
+          // Found an event which starts sooner
+          nextEvents = [event]
+        }
+      }
+    }
+  }
+
+  return {
+    currentEvents: currentEvents,
+    nextEvents: nextEvents
+  }
+}
+
+function formatEvents(events) {
+  let message = ''
+  const prefix = events.length === 1 ? '' : '- '
+  for (const event in events) {
+    message = message + `${prefix}*${event.name}* `
+      + `from ${event.start.format('h:mma')} to ${event.end.format('h:mma z')} at ${event.url}`
+    if ('info' in event) {
+      message = message + `\n${event.info}`
+    }
+    message = message + '\n'
+  }
+
+  return message
+}
+
+// noinspection JSUnusedLocalSymbols
+app.message(':wave:', async ({message, say}) => {
+  const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
+  let reply = '';
+
+  // Current events
+  if (currentEvents) {
+    reply = reply + (currentEvents.length === 1
+      ? 'Currently, there is one event:\n'
+      : 'Currently, the following events are happening:\n')
+    reply = reply + formatEvents(currentEvents)
+  } else {
+    reply = 'There are no current events.\n'
+  }
+
+  // Next events
+  if (nextEvents) {
+    reply = reply + (nextEvents.length === 1
+      ? 'The next event is:\n'
+      : 'The next events are:\n')
+    reply = reply + formatEvents(nextEvents)
+  } else {
+    reply = reply + 'There are no more events today.'
+  }
+  await say(reply);
+});
 
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
 
   console.log('⚡️ Bolt app is running!');
-  
-  console.log(eventSchedule)
-  setupSchedule(eventSchedule)
-  
+
+  await setupSchedule(eventSchedule)
+
 })();
