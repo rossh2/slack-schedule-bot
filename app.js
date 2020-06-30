@@ -1,7 +1,6 @@
 // Require the Bolt package (github.com/slackapi/bolt)
 const { App } = require("@slack/bolt");
 const moment = require('moment');
-const schedule = require('node-schedule');
 const eventSchedule = require('./eventSchedule.js')
 
 const app = new App({
@@ -11,16 +10,24 @@ const app = new App({
 
 let conversationId = 'G0164SF7RFD'; // #bot-testing
 
-async function publishMessage(id, text) {
+async function publishMessage(id, text, timestamp) {
   try {
     // Call the chat.postMessage method using the built-in WebClient
-    const result = await app.client.chat.postMessage({
+    let options = {
       // The token you used to initialize your app
       token: process.env.SLACK_BOT_TOKEN,
       channel: id,
-      text: text
+      text: text,
       // You could also use a blocks[] array to send richer content
-    });
+    }
+    let result;
+    if (timestamp) {
+      options.post_at = timestamp
+      result = await app.client.chat.scheduleMessage(options)
+    }
+    else {
+      result = await app.client.chat.postMessage(options);
+    }
 
     // Print result, which includes information about the message (like TS)
     console.log(result);
@@ -36,16 +43,14 @@ function setupSchedule(events) {
   for (const dateString in events) {
     let dateAsMoment = moment.tz(dateString, timezone)
     let fiveMinutesBefore = dateAsMoment.clone().subtract(5, 'minutes')
-    let scheduleDate = fiveMinutesBefore.toDate()
+    let timestamp = fiveMinutesBefore.unix()
     let message = `*${events[dateString].name}* is starting at ` + // * for bold
         `${dateAsMoment.format('h:mma z')}. ` + 
         `Go to ${events[dateString].url} to join in.` // no markdown needed for URL
     if ('info' in events[dateString]) {
       message = message + `\n${events[dateString].info}`
     }
-    schedule.scheduleJob(scheduleDate, function(){
-      publishMessage(conversationId, message)
-    });
+    publishMessage(conversationId, message, timestamp)
   }
 }
 
