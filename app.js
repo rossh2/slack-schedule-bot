@@ -98,7 +98,7 @@ function formatEvents(events) {
 }
 
 // noinspection JSUnusedLocalSymbols
-app.message(async ({message, say}) => {
+app.event('app_mention', ({ say }) => {
   const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
   let reply = '';
 
@@ -121,7 +121,7 @@ app.message(async ({message, say}) => {
   } else {
     reply = reply + 'There are no more events today.'
   }
-  await say(reply);
+  say(reply);
 });
 
 (async () => {
