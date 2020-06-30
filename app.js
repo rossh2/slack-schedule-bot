@@ -57,14 +57,14 @@ function getCurrentAndNextEvents(events) {
   let currentEvents = []
   let nextEvents = [];
   const now = moment()
-  for (const event of events) {
+  for (let event of events) {
     // Assemble current event(s)
     if (event.start.isSameOrBefore(now, 'minute') && event.end.isSameOrAfter(now, 'minute')) {
       currentEvents.push(event)
     }
     // Assemble next event(s)
     if (event.start.isSame(now, 'day') && event.start.isAfter(now, 'minute')) {
-      if (!nextEvents) {
+      if (nextEvents.length === 0) {
         nextEvents = [event]
       } else {
         const nextStart = nextEvents[0].start
@@ -88,7 +88,7 @@ function getCurrentAndNextEvents(events) {
 function formatEvents(events) {
   let message = ''
   const prefix = events.length === 1 ? '' : '- '
-  for (const event in events) {
+  for (let event of events) {
     message = message + `${prefix}*${event.name}* `
       + `from ${event.start.format('h:mma')} to ${event.end.format('h:mma z')} at ${event.url}`
     if ('info' in event) {
@@ -100,24 +100,23 @@ function formatEvents(events) {
   return message
 }
 
-app.event('app_mention', ({ say }) => {
-  console.log('Replying to message from user')
-
+app.event('app_mention', ({say}) => {
   const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
+
   let reply = '';
 
   // Current events
-  if (currentEvents) {
+  if (currentEvents.length > 0) {
     reply = reply + (currentEvents.length === 1
       ? 'Currently, there is one event:\n'
       : 'Currently, the following events are happening:\n')
     reply = reply + formatEvents(currentEvents)
   } else {
-    reply = 'There are no current events.\n'
+    reply = reply + 'There are no current events.\n'
   }
 
   // Next events
-  if (nextEvents) {
+  if (nextEvents.length > 0) {
     reply = reply + (nextEvents.length === 1
       ? 'The next event is:\n'
       : 'The next events are:\n')
@@ -126,6 +125,7 @@ app.event('app_mention', ({ say }) => {
     reply = reply + 'There are no more events today.'
   }
 
+  console.log('Replying to user:\n' + reply)
   say(reply);
 });
 
