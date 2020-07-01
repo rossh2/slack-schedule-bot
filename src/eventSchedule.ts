@@ -14,22 +14,25 @@
  * https://api.slack.com/messaging/scheduling
 */
 
-const moment = require('moment-timezone');
+import * as moment from 'moment-timezone'
+import {Moment} from "moment-timezone";
 const timezone = 'America/New_York'
 
-const eventSchedule = [
+export interface Event {
+  start: Moment,
+  end: Moment,
+  name: string,
+  url: string,
+  info?: string
+}
+
+export const eventSchedule: Array<Event> = [
   {
     start: moment.tz('2020-06-30T11:30', timezone),
     end: moment.tz('2020-06-30T12:00', timezone),
     name: 'Themed coffee break: Ethics',
     url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
     info: 'Browse papers at http://www.ethicsinnlp.org/workshop/ for ideas.',
-  },
-  {
-    start: moment.tz('2020-06-30T14:00', timezone),
-    end: moment.tz('2020-06-30T15:00', timezone),
-    name: 'Coffee break',
-    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
   },
   {
     start: moment.tz('2020-06-30T16:00', timezone),
@@ -44,6 +47,10 @@ const eventSchedule = [
     name: 'NALOMA Workshop',
     url: 'https://typo.uni-konstanz.de/naloma20/',
   },
+  {
+    start: moment.tz('2020-07-01T16:15', timezone),
+    end: moment.tz('2020-07-01T16:30', timezone),
+    name: 'Coffee break',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
+  },
 ]
-
-module.exports = eventSchedule

@@ -1,7 +1,7 @@
 // Require the Bolt package (github.com/slackapi/bolt)
-const {App} = require("@slack/bolt");
-const moment = require('moment-timezone');
-const eventSchedule = require('./eventSchedule')
+import {App} from "@slack/bolt"
+import * as moment from 'moment-timezone'
+import {eventSchedule, Event} from "./eventSchedule"
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -11,21 +11,23 @@ const app = new App({
 const announcementChannelId = 'G0164SF7RFD'; // #bot-testing
 const directMessageChannelId = 'D01638S4N9K' // direct messages to bot
 
-async function publishMessage(id, text, timestamp) {
+async function publishMessage(id: string, text: string, timestamp: number): Promise<void> {
   try {
-    // Call the chat.postMessage method using the built-in WebClient
-    let options = {
-      // The token you used to initialize your app
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: id,
-      text: text,
-      // You could also use a blocks[] array to send richer content
-    }
     let result;
     if (timestamp) {
-      options.post_at = timestamp
+      let options = {
+        channel: id,
+        text: text,
+        post_at: timestamp.toString()
+        // You could also use a blocks[] array to send richer content
+      }
       result = await app.client.chat.scheduleMessage(options)
     } else {
+      let options = {
+        channel: id,
+        text: text,
+        // You could also use a blocks[] array to send richer content
+      }
       result = await app.client.chat.postMessage(options);
     }
 
@@ -36,26 +38,20 @@ async function publishMessage(id, text, timestamp) {
   }
 }
 
-async function listScheduledMessages() {
+async function listScheduledMessages(): Promise<Array<any>> {
   try {
-    // Call the chat.scheduledMessages.list method using the built-in WebClient
-    const result = await app.client.chat.scheduledMessages.list({
-      // The token you used to initialize your app
-      token: process.env.SLACK_BOT_TOKEN,
-    });
+    const result = await app.client.chat.scheduledMessages.list();
 
+    // @ts-ignore
     return result.scheduled_messages
   } catch (error) {
     console.error(error);
   }
 }
 
-async function deleteScheduledMessage(channel, id) {
+async function deleteScheduledMessage(channel: string, id: string): Promise<void> {
   try {
-    // Call the chat.deleteScheduledMessage method using the built-in WebClient
     const result = await app.client.chat.deleteScheduledMessage({
-      // The token you used to initialize your app
-      token: process.env.SLACK_BOT_TOKEN,
       channel: channel,
       scheduled_message_id: id
     });
@@ -67,7 +63,7 @@ async function deleteScheduledMessage(channel, id) {
   }
 }
 
-async function setupSchedule(events) {
+async function setupSchedule(events: Array<Event>) {
   console.log('Setting up schedule...')
   const now = moment()
   for (const event of events) {
@@ -86,11 +82,11 @@ async function setupSchedule(events) {
   }
 }
 
-function getCurrentAndNextEvents(events) {
+function getCurrentAndNextEvents(events: Array<Event>) {
   let currentEvents = []
   let nextEvents = [];
   const now = moment()
-  for (let event of events) {
+  for (const event of events) {
     // Assemble current event(s)
     if (event.start.isSameOrBefore(now, 'minute') && event.end.isSameOrAfter(now, 'minute')) {
       currentEvents.push(event)
@@ -118,10 +114,10 @@ function getCurrentAndNextEvents(events) {
   }
 }
 
-function formatEvents(events) {
+function formatEvents(events: Array<Event>) {
   let message = ''
   const prefix = events.length === 1 ? '' : '- '
-  for (let event of events) {
+  for (const event of events) {
     message = message + `${prefix}*${event.name}* `
       + `from ${event.start.format('h:mma')} to ${event.end.format('h:mma z')} at ${event.url}`
     if ('info' in event) {
@@ -133,19 +129,19 @@ function formatEvents(events) {
   return message
 }
 
-async function deletePreviouslyScheduled() {
+async function deletePreviouslyScheduled(): Promise<void> {
   let scheduled = await listScheduledMessages();
 
   if (scheduled.length > 0) {
     console.log(`Deleting ${scheduled.length} previously scheduled messages:`)
     console.log(scheduled)
   }
-  for (var message of scheduled) {
+  for (const message of scheduled) {
     await deleteScheduledMessage(message.channel_id, message.id)
   }
 }
 
-function assembleCurrentNextEventsMessage() {
+function assembleCurrentNextEventsMessage(): string {
   const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
 
   let reply = '';
