@@ -1,7 +1,8 @@
 // Require the Bolt package (github.com/slackapi/bolt)
 const {App} = require("@slack/bolt");
 const moment = require('moment-timezone');
-const eventSchedule = require('./eventSchedule.js')
+const eventSchedule = require('./eventSchedule')
+const { publishMessage, deleteScheduledMessage, listScheduledMessages } = require('./api')
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -10,32 +11,8 @@ const app = new App({
 
 const conversationId = 'G0164SF7RFD'; // #bot-testing
 
-async function publishMessage(id, text, timestamp) {
-  try {
-    // Call the chat.postMessage method using the built-in WebClient
-    let options = {
-      // The token you used to initialize your app
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: id,
-      text: text,
-      // You could also use a blocks[] array to send richer content
-    }
-    let result;
-    if (timestamp) {
-      options.post_at = timestamp
-      result = await app.client.chat.scheduleMessage(options)
-    } else {
-      result = await app.client.chat.postMessage(options);
-    }
-
-    // Print result, which includes information about the message (like TS)
-    console.log(result);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 async function setupSchedule(events) {
+  console.log('Setting up schedule...')
   const now = moment()
   for (const event of events) {
     let fiveMinutesBefore = event.start.clone().subtract(5, 'minutes')
@@ -100,7 +77,19 @@ function formatEvents(events) {
   return message
 }
 
-app.event('app_mention', ({say}) => {
+async function deletePreviouslyScheduled() {
+  let scheduled = await listScheduledMessages();
+
+  if (scheduled.length > 0) {
+    console.log(`Deleting ${scheduled.length} previously scheduled messages:`)
+    console.log(scheduled)
+  }
+  for (var message of scheduled) {
+    await deleteScheduledMessage(message.channel_id, message.id)
+  }
+}
+
+function assembleCurrentNextEventsMessage() {
   const {currentEvents, nextEvents} = getCurrentAndNextEvents(eventSchedule)
 
   let reply = '';
@@ -124,6 +113,11 @@ app.event('app_mention', ({say}) => {
   } else {
     reply = reply + 'There are no more events today.'
   }
+  return reply;
+}
+
+app.event('app_mention', ({say}) => {
+  let reply = assembleCurrentNextEventsMessage();
 
   console.log('Replying to user:\n' + reply)
   say(reply);
@@ -134,6 +128,8 @@ app.event('app_mention', ({say}) => {
   await app.start(process.env.PORT || 3000);
 
   console.log('⚡️ Bolt app is running!');
+
+  await deletePreviouslyScheduled()
 
   await setupSchedule(eventSchedule)
 

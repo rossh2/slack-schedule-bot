@@ -35,8 +35,14 @@ const eventSchedule = [
     start: moment.tz('2020-06-30T16:00', timezone),
     end: moment.tz('2020-06-30T16:30', timezone),
     name: 'Themed coffee break: Pets',
-    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/ and https://spatial.chat/s/COSI2020/',
     info: 'Show off your pet in your video! Or tell us about your pet in Slack.',
+  },
+  {
+    start: moment.tz('2020-07-01T15:00', timezone),
+    end: moment.tz('2020-07-01T16:20', timezone),
+    name: 'NALOMA Workshop',
+    url: 'https://typo.uni-konstanz.de/naloma20/',
   },
 ]
 
