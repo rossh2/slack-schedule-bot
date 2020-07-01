@@ -53,4 +53,16 @@ export const eventSchedule: Array<Event> = [
     name: 'Coffee break',
     url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
   },
+  {
+    start: moment.tz('2020-07-01T16:45', timezone),
+    end: moment.tz('2020-07-01T17:00', timezone),
+    name: 'Coffee break',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
+  },
+  {
+    start: moment.tz('2020-07-01T17:45', timezone),
+    end: moment.tz('2020-07-01T18:00', timezone),
+    name: 'Coffee break',
+    url: 'https://spatial.chat/s/WeSSLLI-ESSLLI/',
+  },
 ]
