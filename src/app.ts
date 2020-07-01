@@ -16,6 +16,7 @@ async function publishMessage(id: string, text: string, timestamp: number): Prom
     let result;
     if (timestamp) {
       let options = {
+        token: process.env.SLACK_BOT_TOKEN,
         channel: id,
         text: text,
         post_at: timestamp.toString()
@@ -24,6 +25,7 @@ async function publishMessage(id: string, text: string, timestamp: number): Prom
       result = await app.client.chat.scheduleMessage(options)
     } else {
       let options = {
+        token: process.env.SLACK_BOT_TOKEN,
         channel: id,
         text: text,
         // You could also use a blocks[] array to send richer content
@@ -52,6 +54,7 @@ async function listScheduledMessages(): Promise<Array<any>> {
 async function deleteScheduledMessage(channel: string, id: string): Promise<void> {
   try {
     const result = await app.client.chat.deleteScheduledMessage({
+      token: process.env.SLACK_BOT_TOKEN,
       channel: channel,
       scheduled_message_id: id
     });
