@@ -10,6 +10,7 @@ const app = new App({
 
 const announcementChannelId = 'G0164SF7RFD'; // #bot-testing
 const directMessageChannelId = 'D01638S4N9K' // direct messages to bot
+const botUserId = 'A0164RTBJKD'
 
 async function publishMessage(id: string, text: string, timestamp: number): Promise<void> {
   try {
@@ -179,7 +180,7 @@ app.event('app_mention', ({say}) => {
 });
 
 app.message(async ({message, say}) => {
-  if (message.channel === directMessageChannelId) {
+  if (message.channel === directMessageChannelId && message.user !== botUserId) {
     let reply = assembleCurrentNextEventsMessage();
 
     console.log('Replying to direct message:\n' + reply)
