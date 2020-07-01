@@ -43,7 +43,10 @@ async function publishMessage(id: string, text: string, timestamp: number): Prom
 
 async function listScheduledMessages(): Promise<Array<any>> {
   try {
-    const result = await app.client.chat.scheduledMessages.list();
+    // @ts-ignore
+    const result = await app.client.chat.scheduledMessages.list({
+      token: process.env.SLACK_BOT_TOKEN,
+    });
 
     // @ts-ignore
     return result.scheduled_messages
