@@ -8,7 +8,8 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-const conversationId = 'G0164SF7RFD'; // #bot-testing
+const announcementChannelId = 'G0164SF7RFD'; // #bot-testing
+const directMessageChannelId = 'D01638S4N9K' // direct messages to bot
 
 async function publishMessage(id, text, timestamp) {
   try {
@@ -44,8 +45,7 @@ async function listScheduledMessages() {
     });
 
     return result.scheduled_messages
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
   }
 }
@@ -62,8 +62,7 @@ async function deleteScheduledMessage(channel, id) {
 
     // Print result
     console.log(result);
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
   }
 }
@@ -82,7 +81,7 @@ async function setupSchedule(events) {
       }
 
       let timestamp = fiveMinutesBefore.unix()
-      await publishMessage(conversationId, message, timestamp)
+      await publishMessage(announcementChannelId, message, timestamp)
     }
   }
 }
@@ -176,8 +175,17 @@ function assembleCurrentNextEventsMessage() {
 app.event('app_mention', ({say}) => {
   let reply = assembleCurrentNextEventsMessage();
 
-  console.log('Replying to user:\n' + reply)
+  console.log('Replying to app mention:\n' + reply)
   say(reply);
+});
+
+app.message(async ({message, say}) => {
+  if (message.channel === directMessageChannelId) {
+    let reply = assembleCurrentNextEventsMessage();
+
+    console.log('Replying to direct message:\n' + reply)
+    say(reply);
+  }
 });
 
 (async () => {
