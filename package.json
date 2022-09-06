@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@slack/bolt": "^1.6.0",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.35",
     "typescript": "^3.9.6"
   },
